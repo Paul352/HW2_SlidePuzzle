@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">HW2_SlidePuzzle</string>
+    <string name="reset">Reset</string>
 </resources>
