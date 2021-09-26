@@ -22,8 +22,9 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
     private PuzzleTile[][] board;
 
     private static final Random generator = new Random();
-
+    // Board row count can only be same as col count.
     private int boardDimen;
+    // Max dimensions of board is 9x9.
     private final int MAX_SIZE = 9;
 
     public RectangleSurfaceView(Context context, AttributeSet attrs) {
@@ -48,15 +49,20 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
 
     @Override
     protected void onDraw(Canvas canvas) {
+        // Use these to draw the tiles.
         int h = getHeight()/boardDimen;
         int w = getWidth()/boardDimen;
-        int id = 1;
-        // Ensure this only first time board is drawn!!!!
-        if (board[0][0].getTileNum() == 0){
 
+        int id = 1;
+        // Ensure this only executes once right after board is initialized!!!!! Id == 0 only just
+        // after board is initialized
+        // Set attributes of each tile on board.
+        // After setting the attributes of each tile, randomize the board.
+        if (board[0][0].getTileNum() == 0){
+            // Set attributes of each element of board.
             for (int i = 0; i < boardDimen; i++){
                 for(int j = 0; j < boardDimen; j++){
-                    // Initialize each element of board.
+
                     board[i][j].setAttributes(id, j * w, i * h,
                             (j * w + w), (i * h + h));
                     id++;
@@ -67,7 +73,7 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
         }
         // Reset id to one so we can check each spot of the board.
         id = 1;
-
+        // Loop through the entire board to draw each tile.
         for(int i = 0; i < boardDimen; i++){
             for(int j = 0; j < boardDimen; j++){
                 // If the tile is the right spot, draw the number as green.
@@ -81,8 +87,9 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
                 // If the tile is not the empty tile, draw the tile and tileNum.
                 // Do NOT draw the empty tile. It will be displayed as a blank square.
                 if (board[i][j].getTileNum() != boardDimen*boardDimen) {
-                    canvas.drawRect(board[i][j].getLeft(), board[i][j].getTop(),
-                            board[i][j].getRight(), board[i][j].getBottom(), rectPaint);
+                    // The + and - 10 is to give little gaps between tiles when drawing them.
+                    canvas.drawRect(board[i][j].getLeft() + 10, board[i][j].getTop() + 10,
+                            board[i][j].getRight() - 10, board[i][j].getBottom() - 10, rectPaint);
 
                     canvas.drawText("" + board[i][j].getTileNum(),
                             j * w + (float) w / 2, (i + 1) * h - (float) h / 2, textPaint);
@@ -95,11 +102,13 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
 
     @Override
     public boolean onTouch(View view, MotionEvent event) {
+        // Store where the user clicked as a float.
         float downX = event.getX();
         float downY = event.getY();
-
+        // Figure out which tile the user clicked inside of.
         int row = getBoardPosR(downX,downY);
         int col = getBoardPosC(downX,downY);
+
         // Take tile user clicked, and check if below, above, left, or right is a legal move.
         // If it is a legal move, swap the tile.
         if(checkLegalMove(row, col, 0, 1)){
@@ -203,24 +212,23 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
 
     @Override
     public void onClick(View view) {
+        // If user clicks reset button, randomize board.
         if (view.getId() == R.id.Reset){
-            // If user clicks reset button, randomize board.
             randomizeBoard();
         }
+        // Increase size of board and re-initialize.
         else if (view.getId() == R.id.increaseTiles){
 
             if (boardDimen < MAX_SIZE) {
-                // Increase size of board and re-initialize board.
                 boardDimen++;
                 boardInit();
             }
         }
+        // Decrease size of board and re-initialize.
         else if (view.getId() == R.id.decreaseTiles){
 
             if (boardDimen > 3) {
-                // Decrease size of board and re-initialize board.
                 boardDimen--;
-
                 boardInit();
             }
         }

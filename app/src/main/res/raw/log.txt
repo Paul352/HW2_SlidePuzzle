@@ -1,0 +1,13 @@
+Log your changes here.
+9/20/21
+Project can now draw rectangle in 4x4 grid. Draws numbers in the center of each tile.
+Puzzle does not function yet.
+9/21/21
+User can now click in a tile to move it. If tile is in correct position, game draws tile as green.
+9/25/21
+User can now re-size board by pressing increase or decrease button.
+Text now indicates if tile is in correct position. Tiles drawn as white.
+Text does not display properly if board is not 4x4.
+9/26/21
+Added some small gaps between tiles.
+Added more comments.
