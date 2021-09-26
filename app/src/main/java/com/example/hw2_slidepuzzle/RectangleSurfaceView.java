@@ -18,71 +18,73 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
 
     private final Paint rectPaint;
     private final Paint textPaint;
-    private PuzzleRectangle[][] puzzleRect;
+
+    private PuzzleTile[][] board;
+
     private static final Random generator = new Random();
+
+    private int boardDimen;
+    private final int MAX_SIZE = 9;
 
     public RectangleSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         rectPaint = new Paint();
-        rectPaint.setColor(Color.RED);
+        rectPaint.setColor(Color.WHITE);
         rectPaint.setStyle(Paint.Style.STROKE);
         rectPaint.setStrokeWidth(10);
 
         textPaint = new Paint();
-        textPaint.setColor(Color.WHITE);
+        textPaint.setColor(Color.RED);
         textPaint.setTextSize(24);
         textPaint.setTextAlign(Paint.Align.CENTER);
 
-
-        puzzleRect = new PuzzleRectangle[4][4];
-
-        for (int i = 0; i < 4; i++){
-            for(int j = 0; j < 4; j++){
-                // Initialize each tile of board.
-                puzzleRect[i][j] = new PuzzleRectangle();
-            }
-        }
+        // Initialize board as a 4x4.
+        boardDimen = 4;
+        boardInit();
 
         setWillNotDraw(false);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        int h = getHeight()/4;
-        int w = getWidth()/4;
+        int h = getHeight()/boardDimen;
+        int w = getWidth()/boardDimen;
         int id = 1;
-        // Ensure this only runs at beginning of program!!!
-        if (puzzleRect[0][0].getTileNum() == 0){
+        // Ensure this only first time board is drawn!!!!
+        if (board[0][0].getTileNum() == 0){
 
-            for (int i = 0; i < 4; i++){
-                for(int j = 0; j < 4; j++){
+            for (int i = 0; i < boardDimen; i++){
+                for(int j = 0; j < boardDimen; j++){
                     // Initialize each element of board.
-                    puzzleRect[i][j].setAttributes(id, j * w, i * h, j * w + w, i * h + h);
+                    board[i][j].setAttributes(id, j * w, i * h,
+                            (j * w + w), (i * h + h));
                     id++;
                 }
             }
+            // After the board is ordered numerically, randomize the tiles.
             randomizeBoard();
         }
-
+        // Reset id to one so we can check each spot of the board.
         id = 1;
 
-        for(int i = 0; i < 4; i++){
-            for(int j = 0; j < 4; j++){
-                // If the tile is the right spot, draw it as green.
+        for(int i = 0; i < boardDimen; i++){
+            for(int j = 0; j < boardDimen; j++){
+                // If the tile is the right spot, draw the number as green.
                 // Else, draw it as red.
-                if(puzzleRect[i][j].getTileNum() == id){
-                    rectPaint.setColor(Color.GREEN);
+                if(board[i][j].getTileNum() == id){
+                    textPaint.setColor(Color.GREEN);
                 }
                 else{
-                    rectPaint.setColor(Color.RED);
+                    textPaint.setColor(Color.RED);
                 }
                 // If the tile is not the empty tile, draw the tile and tileNum.
-                if (puzzleRect[i][j].getTileNum() != 16) {
-                    canvas.drawRect(puzzleRect[i][j].getLeft(), puzzleRect[i][j].getTop(),
-                            puzzleRect[i][j].getRight(), puzzleRect[i][j].getBottom(), rectPaint);
+                // Do NOT draw the empty tile. It will be displayed as a blank square.
+                if (board[i][j].getTileNum() != boardDimen*boardDimen) {
+                    canvas.drawRect(board[i][j].getLeft(), board[i][j].getTop(),
+                            board[i][j].getRight(), board[i][j].getBottom(), rectPaint);
 
-                    canvas.drawText("" + puzzleRect[i][j].getTileNum(),
+                    canvas.drawText("" + board[i][j].getTileNum(),
                             j * w + (float) w / 2, (i + 1) * h - (float) h / 2, textPaint);
                 }
                 id++;
@@ -127,23 +129,23 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
      *
      * @param row Clicked tile row
      * @param col Clicked tile col
-     * @param rowI Increment of row (can be -1, 0, or 1)
-     * @param colI Increment of col (can be -1, 0, or 1)
+     * @param rowIncrement Increment of row (can be -1, 0, or 1)
+     * @param colIncrement Increment of col (can be -1, 0, or 1)
      * @return Whether the move is legal.
      */
-    public boolean checkLegalMove(int row, int col, int rowI, int colI){
-        return isInBounds(row + rowI, col + colI)
-                && puzzleRect[row + rowI][col + colI].getTileNum() == 16;
+    public boolean checkLegalMove(int row, int col, int rowIncrement, int colIncrement){
+        return isInBounds(row + rowIncrement, col + colIncrement)
+                && board[row + rowIncrement][col + colIncrement].getTileNum() == boardDimen*boardDimen;
     }
 
     /** isInBounds checks if the requested check is in bounds. Used in checkLegalMove only.
      *
      * @param row Tile row
      * @param col Col of tile being checked.
-     * @return Whether the area is legal.
+     * @return Whether the checked area is in bounds of the board.
      */
     public boolean isInBounds(int row, int col){
-        return row >= 0 && row < 4 && col >= 0 && col < 4;
+        return row >= 0 && row < boardDimen && col >= 0 && col < boardDimen;
     }
 
     /** getBoardPosR gets the row of the tile the user clicked.
@@ -154,10 +156,10 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
      */
     public int getBoardPosR(float x, float y){
 
-        for(int i = 0; i < puzzleRect.length; i++){
-            for(int j = 0; j < puzzleRect.length; j++){
+        for(int i = 0; i < boardDimen; i++){
+            for(int j = 0; j < boardDimen; j++){
 
-                if(puzzleRect[i][j].pointInRect(x,y)){
+                if(board[i][j].pointInTile(x,y)){
                     return i;
                 }
             }
@@ -173,10 +175,10 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
      */
     public int getBoardPosC(float x, float y){
 
-        for(int i = 0; i < puzzleRect.length; i++){
-            for(int j = 0; j < puzzleRect.length; j++){
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board.length; j++){
 
-                if(puzzleRect[i][j].pointInRect(x,y)){
+                if(board[i][j].pointInTile(x,y)){
                     return j;
                 }
             }
@@ -193,16 +195,51 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
      */
     public void swap(int row, int col, int incR, int incC){
         // All that needs to be is swap the tileNumber of the clicked tile and empty tile.
-        int temp = puzzleRect[row + incR][col + incC].getTileNum();
-        puzzleRect[row + incR][col + incC].setTileNum(puzzleRect[row][col].getTileNum());
-        puzzleRect[row][col].setTileNum(temp);
+        int temp = board[row + incR][col + incC].getTileNum();
+        board[row + incR][col + incC].setTileNum(board[row][col].getTileNum());
+        board[row][col].setTileNum(temp);
     }
 
 
     @Override
     public void onClick(View view) {
-        randomizeBoard();
+        if (view.getId() == R.id.Reset){
+            // If user clicks reset button, randomize board.
+            randomizeBoard();
+        }
+        else if (view.getId() == R.id.increaseTiles){
+
+            if (boardDimen < MAX_SIZE) {
+                // Increase size of board and re-initialize board.
+                boardDimen++;
+                boardInit();
+            }
+        }
+        else if (view.getId() == R.id.decreaseTiles){
+
+            if (boardDimen > 3) {
+                // Decrease size of board and re-initialize board.
+                boardDimen--;
+
+                boardInit();
+            }
+        }
         invalidate();
+    }
+
+    /** initBoard initializes the board.
+     *
+     */
+    public void boardInit(){
+        // Initialize the board array.
+        board = new PuzzleTile[boardDimen][boardDimen];
+
+        for (int i = 0; i < boardDimen; i++){
+            for(int j = 0; j < boardDimen; j++){
+                // Initialize each tile of board.
+                board[i][j] = new PuzzleTile();
+            }
+        }
     }
 
     /** randomizeBoard takes all of the tiles on the board and randomly shuffles them.
@@ -216,15 +253,15 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
         Resource: https://stackoverflow.com/questions/20190110/2d-int-array-shuffle
         Solution: I used the example code from this post and modified it for my needs.
         */
-        for(int i = puzzleRect.length - 1; i > 0; i--){
-            for(int j = puzzleRect[i].length - 1; j > 0; j--){
+        for(int i = boardDimen - 1; i > 0; i--){
+            for(int j = boardDimen - 1; j > 0; j--){
 
                 int m = generator.nextInt(i + 1);
                 int n = generator.nextInt(j + 1);
 
-                int temp = puzzleRect[i][j].getTileNum();
-                puzzleRect[i][j].setTileNum(puzzleRect[m][n].getTileNum());
-                puzzleRect[m][n].setTileNum(temp);
+                int temp = board[i][j].getTileNum();
+                board[i][j].setTileNum(board[m][n].getTileNum());
+                board[m][n].setTileNum(temp);
             }
         }
 

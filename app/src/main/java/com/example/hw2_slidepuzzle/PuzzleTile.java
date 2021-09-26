@@ -1,10 +1,10 @@
 package com.example.hw2_slidepuzzle;
 
-public class PuzzleRectangle {
+public class PuzzleTile {
     private int tileNum;
     private int left, top, right, bottom;
 
-    public PuzzleRectangle(){
+    public PuzzleTile(){
         tileNum = 0;
         left = 0;
         top = 0;
@@ -21,7 +21,7 @@ public class PuzzleRectangle {
 
     }
 
-    public boolean pointInRect(float x, float y){
+    public boolean pointInTile(float x, float y){
         return this.left <= x && this.right >= x && this.top <= y && this.bottom >= y;
     }
 
