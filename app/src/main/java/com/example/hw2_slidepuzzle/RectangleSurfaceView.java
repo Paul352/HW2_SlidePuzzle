@@ -21,7 +21,7 @@ public class RectangleSurfaceView extends SurfaceView implements View.OnTouchLis
 
     private PuzzleTile[][] board;
 
-    private static final Random generator = new Random();
+    private final Random generator = new Random();
     // Board row count can only be same as col count.
     private int boardDimen;
     // Max dimensions of board is 9x9.
